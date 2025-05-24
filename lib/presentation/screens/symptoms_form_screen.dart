@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medical_diagnosis_ai/presentation/screens/history_screen.dart';
-import '../../data/repositories/mock_diagnosis_repository.dart';
+import '../../data/repositories/gemini_diagnosis_repository.dart';
 import '../../domain/entities/diagnosis.dart';
 import '../../domain/usecases/get_diagnosis_usecase.dart';
 import 'package:hive/hive.dart';
@@ -166,7 +166,7 @@ class DiagnosisResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final usecase = GetDiagnosisUseCase(MockDiagnosisRepository());
+    final usecase = GetDiagnosisUseCase(GeminiDiagnosisRepository());
 
     return Scaffold(
       appBar: AppBar(title: const Text('Resultado del Diagnóstico')),

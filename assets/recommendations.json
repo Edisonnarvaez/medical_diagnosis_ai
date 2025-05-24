@@ -1,0 +1,86 @@
+[
+    {
+    "icon": "water_drop",
+    "text": "Toma al menos 2 litros de agua al día.",
+    "iconColor": "#5D8CAE",
+    "iconBgColor": "#D6E4F0"
+    },
+    {
+    "icon": "directions_run",
+    "text": "Haz ejercicio al menos 3 veces por semana.",
+    "iconColor": "#5D8CAE",
+    "iconBgColor": "#D6E4F0"
+    },
+    {
+    "icon": "nightlight_round",
+    "text": "Duerme al menos 7-8 horas por noche.",
+    "iconColor": "#5D8CAE",
+    "iconBgColor": "#D6E4F0"
+    },
+    {
+        "icon": "emoji_emotions",
+        "text": "Practica la meditación o el mindfulness.",
+        "iconColor": "#5D8CAE",
+        "iconBgColor": "#D6E4F0"
+    },
+    {
+        "icon": "group",
+        "text": "Mantén relaciones sociales saludables.",
+        "iconColor": "#5D8CAE",
+        "iconBgColor": "#D6E4F0"
+    },
+    {
+        "icon": "local_hospital",
+        "text": "Evita el consumo de tabaco y alcohol.",
+        "iconColor": "#5D8CAE",
+        "iconBgColor": "#D6E4F0"
+    },
+    {
+        "icon": "sports_gymnastics",
+        "text": "Realiza ejercicios de fuerza y flexibilidad.",
+        "iconColor": "#5D8CAE",
+        "iconBgColor": "#D6E4F0"
+    },
+    {
+        "icon": "accessibility_new",
+        "text": "Mantén un peso saludable.",
+        "iconColor": "#5D8CAE",
+        "iconBgColor": "#D6E4F0"
+    },
+    {
+        "icon": "favorite",
+        "text": "Dedica tiempo a tus pasatiempos y aficiones.",
+        "iconColor": "#5D8CAE",
+        "iconBgColor": "#D6E4F0"
+    },
+    {
+        "icon": "emoji_objects",
+        "text": "Establece metas realistas y alcanzables.",
+        "iconColor": "#5D8CAE",
+        "iconBgColor": "#D6E4F0"
+    },
+    {
+        "icon": "self_improvement",
+        "text": "Aprende algo nuevo cada día.",
+        "iconColor": "#5D8CAE",
+        "iconBgColor": "#D6E4F0"
+    },
+    {
+        "icon": "fastfood",
+        "text": "Incluye frutas y verduras en tu dieta diaria.",
+        "iconColor": "#5D8CAE",
+        "iconBgColor": "#D6E4F0"
+    },
+    {
+        "icon": "mood",
+        "text": "Dedica tiempo a actividades que te hagan feliz.",
+        "iconColor": "#5D8CAE",
+        "iconBgColor": "#D6E4F0"
+    },
+    {
+        "icon": "check_circle",
+        "text": "Realiza chequeos médicos regulares.",
+        "iconColor": "#5D8CAE",
+        "iconBgColor": "#D6E4F0"
+    }
+]

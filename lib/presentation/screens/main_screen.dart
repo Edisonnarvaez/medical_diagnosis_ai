@@ -1,14 +1,83 @@
+import 'dart:convert';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:medical_diagnosis_ai/presentation/auth_controller.dart';
 import 'package:medical_diagnosis_ai/presentation/screens/history_screen.dart';
 import 'package:medical_diagnosis_ai/presentation/screens/symptoms_form_screen.dart';
 import 'package:medical_diagnosis_ai/presentation/screens/userProfileScreen.dart';
+import 'package:medical_diagnosis_ai/data/repositories/user_profile_repository.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String? userName;
+  final UserProfileRepository _profileRepo = UserProfileRepository();
+
+  // Lista de recomendaciones posibles
+  List<Map<String, dynamic>> allRecommendations = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+    loadRecommendations();
+  }
+
+  Future<void> _loadUserName() async {
+    final authController = Get.find<AuthController>();
+    final userId = authController.user.value?.$id;
+    if (userId != null) {
+      final data = await _profileRepo.getProfile(userId);
+      setState(() {
+        userName = data?['name'] ?? 'Usuario';
+      });
+    }
+  }
+
+  Future<void> loadRecommendations() async {
+    final String jsonString = await rootBundle.loadString('assets/recommendations.json');
+    final List<dynamic> jsonList = json.decode(jsonString);
+    setState(() {
+      allRecommendations = jsonList.map((e) => Map<String, dynamic>.from(e)).toList();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final authController = Get.find<AuthController>();
+
+    final today = DateTime.now().day;
+    final recommendations = List.generate(
+      3,
+      (i) => allRecommendations.isNotEmpty
+          ? allRecommendations[(today + i) % allRecommendations.length]
+          : null,
+    );
+
+    if (allRecommendations.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Inicio'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Cerrar sesión',
+            onPressed: () async {
+              await authController.logout();
+              Get.offAllNamed('/login');
+            },
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -18,45 +87,54 @@ class HomeScreen extends StatelessWidget {
               // Header con saludo y avatar
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Bienvenido,',
-                        style: TextStyle(
-                          fontSize: 36,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1A2639),
+                  // Usa Expanded para que el texto se adapte
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Bienvenido,',
+                          style: TextStyle(
+                            fontSize: 28, // Más pequeño para móviles
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1A2639),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: false,
                         ),
-                      ),
-                      Text(
-                        'Usuario',
-                        style: TextStyle(
-                          fontSize: 36,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1A2639),
+                        Text(
+                          userName ?? 'Usuario',
+                          style: TextStyle(
+                            fontSize: 28, // Más pequeño para móviles
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1A2639),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: false,
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
+                  SizedBox(width: 16), // Espacio entre texto y avatar
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const ProfileScreen()),
-                      );
+                      ).then((_) => _loadUserName());
                     },
                     child: Container(
-                      width: 70,
-                      height: 70,
+                      width: 60,
+                      height: 60,
                       decoration: BoxDecoration(
                         color: Color(0xFFAEC8E9),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.person,
-                        size: 40,
+                        size: 36,
                         color: Color(0xFF3A5B83),
                       ),
                     ),
@@ -166,38 +244,30 @@ class HomeScreen extends StatelessWidget {
               Text(
                 'Recomendaciones Generales',
                 style: TextStyle(
-                  fontSize: 26,
+                  fontSize: 22, // Más pequeño para móviles
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF1A2639),
                 ),
               ),
               
-              SizedBox(height: 30),
-              
-              // Lista de recomendaciones con iconos personalizados
-              RecommendationItem(
-                icon: Icons.water_drop,
-                text: 'Toma al menos 2 litros de agua al día.',
-                iconColor: Color(0xFF5D8CAE),
-                iconBgColor: Color(0xFFD6E4F0),
-              ),
-              
-              SizedBox(height: 25),
-              
-              RecommendationItem(
-                icon: Icons.directions_run,
-                text: 'Haz ejercicio al menos 3 veces por semana.',
-                iconColor: Color(0xFF5D8CAE),
-                iconBgColor: Color(0xFFD6E4F0),
-              ),
-              
-              SizedBox(height: 25),
-              
-              RecommendationItem(
-                icon: Icons.nightlight_round,
-                text: 'Duerme al menos 7-8 horas por noche.',
-                iconColor: Color(0xFF5D8CAE),
-                iconBgColor: Color(0xFFD6E4F0),
+              SizedBox(height: 20),
+              Expanded(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: recommendations.length,
+                  separatorBuilder: (_, __) => SizedBox(height: 16),
+                  itemBuilder: (context, index) {
+                    final rec = recommendations[index];
+                    if (rec == null) return SizedBox.shrink();
+                    return RecommendationItem(
+                      icon: getIconData(rec['icon']),
+                      text: rec['text'],
+                      iconColor: Color(int.parse(rec['iconColor'].replaceFirst('#', '0xFF'))),
+                      iconBgColor: Color(int.parse(rec['iconBgColor'].replaceFirst('#', '0xFF'))),
+                    );
+                  },
+                ),
               ),
               
               Spacer(),
@@ -254,5 +324,44 @@ class RecommendationItem extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+IconData getIconData(String iconName) {
+  switch (iconName) {
+    case 'water_drop':
+      return Icons.water_drop;
+    case 'directions_run':
+      return Icons.directions_run;
+    case 'nightlight_round':
+      return Icons.nightlight_round;
+    case 'restaurant':
+      return Icons.restaurant;
+    case 'self_improvement':
+      return Icons.self_improvement;
+    case 'sunny':
+      return Icons.sunny;
+    case 'emoji_emotions':
+      return Icons.emoji_emotions;
+    case 'group':
+      return Icons.group;
+    case 'local_hospital':
+      return Icons.local_hospital;
+    case 'sports_gymnastics':
+      return Icons.sports_gymnastics;
+    case 'accessibility_new':
+      return Icons.accessibility_new;
+    case 'favorite':
+      return Icons.favorite;
+    case 'emoji_objects':
+      return Icons.emoji_objects;
+    case 'fastfood':
+      return Icons.fastfood;
+    case 'mood':
+      return Icons.mood;
+    case 'check_circle':
+      return Icons.check_circle;
+    default:
+      return Icons.star;
   }
 }

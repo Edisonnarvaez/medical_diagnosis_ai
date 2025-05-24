@@ -6,7 +6,7 @@ class GetDiagnosisUseCase {
 
   GetDiagnosisUseCase(this.repository);
 
-  Future<Diagnosis> execute(List<String> symptoms) {
-    return repository.getDiagnosis(symptoms);
+  Future<Diagnosis> execute(List<String> symptoms, [Map<String, dynamic>? profile]) {
+    return repository.getDiagnosis(symptoms, profile);
   }
 }
