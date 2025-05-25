@@ -11,12 +11,23 @@ class HistoryScreen extends StatelessWidget {
     final box = Hive.box('diagnosis_history');
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Historial Médico')),
+      backgroundColor: const Color(0xFFF6F9FC),
+      appBar: AppBar(
+        title: const Text('Historial Médico'),
+        backgroundColor: Colors.white,
+        foregroundColor: Color(0xFF1A2639),
+        elevation: 0,
+      ),
       body: ValueListenableBuilder(
         valueListenable: box.listenable(),
         builder: (context, Box box, _) {
           if (box.isEmpty) {
-            return const Center(child: Text('No hay registros aún.'));
+            return const Center(
+              child: Text(
+                'No hay registros aún.',
+                style: TextStyle(fontSize: 18, color: Colors.grey),
+              ),
+            );
           }
 
           return ListView.builder(
@@ -25,12 +36,29 @@ class HistoryScreen extends StatelessWidget {
               final HiveDiagnosisModel entry = box.getAt(index);
 
               return Card(
-                margin: const EdgeInsets.all(8),
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                elevation: 2,
                 child: ListTile(
-                  title: Text(entry.result),
+                  leading: Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD6E4F0),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.medical_services, color: Color(0xFF5D8CAE), size: 28),
+                  ),
+                  title: Text(
+                    entry.result,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      const SizedBox(height: 4),
                       Text('Síntomas: ${entry.symptoms.join(', ')}'),
                       Text('Confianza: ${(entry.confidence * 100).toStringAsFixed(1)}%'),
                       Text('Fecha: ${entry.createdAt.toLocal()}'),

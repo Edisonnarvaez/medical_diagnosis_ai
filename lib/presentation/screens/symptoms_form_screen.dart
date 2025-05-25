@@ -37,7 +37,6 @@ class _SymptomsFormScreenState extends State<SymptomsFormScreen> {
       return;
     }
 
-    // Aquí luego llamaremos al modelo IA (por ahora lo simulamos)
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -49,9 +48,15 @@ class _SymptomsFormScreenState extends State<SymptomsFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Ingresa tus síntomas')),
+      backgroundColor: const Color(0xFFF6F9FC),
+      appBar: AppBar(
+        title: const Text('Ingresa tus síntomas'),
+        backgroundColor: Colors.white,
+        foregroundColor: Color(0xFF1A2639),
+        elevation: 0,
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
             Form(
@@ -61,16 +66,30 @@ class _SymptomsFormScreenState extends State<SymptomsFormScreen> {
                   Expanded(
                     child: TextFormField(
                       controller: _symptomController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.sick, color: Color(0xFF5D8CAE)),
                         labelText: 'Síntoma',
-                        border: OutlineInputBorder(),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
-                  ElevatedButton(
+                  ElevatedButton.icon(
                     onPressed: _addSymptom,
-                    child: const Text('Agregar'),
+                    icon: const Icon(Icons.add),
+                    label: const Text('Agregar'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1D3557),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      elevation: 2,
+                    ),
                   ),
                 ],
               ),
@@ -78,64 +97,62 @@ class _SymptomsFormScreenState extends State<SymptomsFormScreen> {
             const SizedBox(height: 16),
             Wrap(
               spacing: 8.0,
-              children:
-                  selectedSymptoms
-                      .map(
-                        (symptom) => Chip(
-                          label: Text(symptom),
-                          onDeleted: () {
-                            setState(() {
-                              selectedSymptoms.remove(symptom);
-                            });
-                          },
-                        ),
-                      )
-                      .toList(),
+              children: selectedSymptoms
+                  .map(
+                    (symptom) => Chip(
+                      label: Text(symptom),
+                      backgroundColor: const Color(0xFFD6E4F0),
+                      deleteIcon: const Icon(Icons.close, size: 18),
+                      onDeleted: () {
+                        setState(() {
+                          selectedSymptoms.remove(symptom);
+                        });
+                      },
+                    ),
+                  )
+                  .toList(),
             ),
             const Spacer(),
-            ElevatedButton.icon(
-              onPressed: _submitSymptoms,
-              icon: const Icon(Icons.search),
-              label: const Text('Analizar síntomas'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size.fromHeight(
-                  50,
-                ), // Altura mínima del botón
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                ), // Padding horizontal
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12), // Bordes redondeados
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton.icon(
+                onPressed: _submitSymptoms,
+                icon: const Icon(Icons.search),
+                label: const Text('Analizar síntomas', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1D3557),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  elevation: 2,
                 ),
-                elevation: 2, // Sombra del botón
               ),
             ),
-            //const Spacer(),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const HistoryScreen(),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const HistoryScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.history),
+                label: const Text('Ver historial médico', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF5D8CAE),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                );
-              },
-              icon: const Icon(Icons.history),
-              label: const Text('Ver historial médico'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size.fromHeight(
-                  50,
-                ), // Altura mínima del botón
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                ), // Padding horizontal
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12), // Bordes redondeados
+                  elevation: 2,
                 ),
-                elevation: 2, // Sombra del botón
-                backgroundColor:
-                    Theme.of(context).primaryColor, // Color de fondo
-                foregroundColor: Colors.white, // Color del texto e ícono
               ),
             ),
           ],
@@ -145,7 +162,7 @@ class _SymptomsFormScreenState extends State<SymptomsFormScreen> {
   }
 }
 
-// Pantalla simulada para el resultado del diagnóstico
+// Pantalla de resultado del diagnóstico REAL usando Gemini
 class DiagnosisResultScreen extends StatelessWidget {
   final List<String> symptoms;
 
@@ -160,7 +177,6 @@ class DiagnosisResultScreen extends StatelessWidget {
       recommendations: diagnosis.recommendations,
       createdAt: DateTime.now(),
     );
-
     await box.add(entry);
   }
 
@@ -169,7 +185,13 @@ class DiagnosisResultScreen extends StatelessWidget {
     final usecase = GetDiagnosisUseCase(GeminiDiagnosisRepository());
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Resultado del Diagnóstico')),
+      backgroundColor: const Color(0xFFF6F9FC),
+      appBar: AppBar(
+        title: const Text('Resultado del Diagnóstico'),
+        backgroundColor: Colors.white,
+        foregroundColor: Color(0xFF1A2639),
+        elevation: 0,
+      ),
       body: FutureBuilder<Diagnosis>(
         future: usecase.execute(symptoms),
         builder: (context, snapshot) {
@@ -178,7 +200,12 @@ class DiagnosisResultScreen extends StatelessWidget {
           }
 
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(
+              child: Text(
+                'Error: ${snapshot.error}',
+                style: const TextStyle(color: Colors.red, fontSize: 18),
+              ),
+            );
           }
 
           if (!snapshot.hasData) {
@@ -191,34 +218,103 @@ class DiagnosisResultScreen extends StatelessWidget {
           _saveDiagnosis(diagnosis, symptoms);
 
           return Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(24.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Text(
-                  'Síntomas ingresados:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Container(
+                  width: 90,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFAEC8E9),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.medical_services, size: 54, color: Color(0xFF1A2639)),
                 ),
-                const SizedBox(height: 8),
-                Text(symptoms.join(', ')),
                 const SizedBox(height: 24),
                 Text(
-                  'Diagnóstico: ${diagnosis.result}',
-                  style: const TextStyle(
-                    fontSize: 20,
+                  'Diagnóstico IA',
+                  style: TextStyle(
+                    fontSize: 28,
                     fontWeight: FontWeight.bold,
+                    color: Color(0xFF1A2639),
                   ),
                 ),
-                Text(
-                  'Nivel de certeza: ${(diagnosis.confidence * 100).toStringAsFixed(1)}%',
+                const SizedBox(height: 18),
+                Card(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  elevation: 2,
+                  color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Síntomas ingresados:',
+                          style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1A2639)),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          symptoms.join(', '),
+                          style: const TextStyle(color: Colors.black87),
+                        ),
+                        const SizedBox(height: 18),
+                        Text(
+                          'Diagnóstico: ${diagnosis.result}',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1D3557),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Nivel de certeza: ${(diagnosis.confidence * 100).toStringAsFixed(1)}%',
+                          style: const TextStyle(color: Colors.black87),
+                        ),
+                        const SizedBox(height: 18),
+                        const Text(
+                          'Recomendaciones:',
+                          style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1A2639)),
+                        ),
+                        const SizedBox(height: 6),
+                        ...diagnosis.recommendations.map(
+                          (r) => Row(
+                            children: [
+                              const Icon(Icons.check_circle, color: Color(0xFF5D8CAE), size: 20),
+                              const SizedBox(width: 8),
+                              Expanded(child: Text(r, style: const TextStyle(color: Colors.black87))),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 24),
-                const Text(
-                  'Recomendaciones:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                const Spacer(),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.history),
+                    label: const Text('Ver historial médico', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF5D8CAE),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      elevation: 2,
+                    ),
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => const HistoryScreen()),
+                      );
+                    },
+                  ),
                 ),
-                const SizedBox(height: 8),
-                ...diagnosis.recommendations.map((r) => Text('- $r')).toList(),
               ],
             ),
           );

@@ -12,8 +12,6 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
-
-  // Controladores para los campos de texto
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _conditionsController = TextEditingController();
@@ -49,10 +47,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _gender = data['gender'];
         _weight = (data['weight'] as num?)?.toDouble() ?? 60;
         _height = (data['height'] as num?)?.toDouble() ?? 160;
-        final condiciones = (data['conditions'] as String).split(',').map((e) => e.trim()).toList();
-        _conditionsController.text = condiciones.join(', ');
-        final medicamentos = (data['medications'] as String).split(',').map((e) => e.trim()).toList();
-        _medicationsController.text = medicamentos.join(', ');
+        _conditionsController.text = (data['conditions'] as String?) ?? '';
+        _medicationsController.text = (data['medications'] as String?) ?? '';
         _isSmoker = data['isSmoker'] ?? false;
         _drinksAlcohol = data['drinksAlcohol'] ?? false;
         _activityLevel = data['activityLevel'] ?? 'Moderada';
@@ -61,14 +57,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _saveProfile() async {
-    print('Intentando guardar perfil...');
     final authController = Get.find<AuthController>();
     final userId = authController.user.value?.$id;
-    print('userId: $userId');
-    if (userId == null) {
-      print('No hay usuario autenticado');
-      return;
-    }
+    if (userId == null) return;
     final data = {
       'userId': userId,
       'name': _nameController.text,
@@ -76,21 +67,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       'gender': _gender,
       'weight': _weight,
       'height': _height,
-      'conditions': _conditionsController.text, // <-- texto plano
-      'medications': _medicationsController.text, // <-- texto plano
+      'conditions': _conditionsController.text,
+      'medications': _medicationsController.text,
       'isSmoker': _isSmoker,
       'drinksAlcohol': _drinksAlcohol,
       'activityLevel': _activityLevel,
     };
-    print('Datos a guardar: $data');
     try {
       await _profileRepo.saveProfile(userId, data);
-      print('Perfil guardado correctamente');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Perfil guardado correctamente')),
       );
     } catch (e) {
-      print('Error al guardar perfil: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error al guardar perfil: $e')),
       );
@@ -99,127 +87,211 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authController = Get.find<AuthController>();
+    final theme = Theme.of(context);
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF6F9FC),
       appBar: AppBar(
         title: const Text('Perfil de Usuario'),
+        backgroundColor: Colors.white,
+        foregroundColor: Color(0xFF1A2639),
+        elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Cerrar sesión',
             onPressed: () async {
-              await authController.logout();
+              await Get.find<AuthController>().logout();
               Get.offAllNamed('/login');
             },
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text("Datos Personales", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Nombre completo'),
-                validator: (value) => value == null || value.isEmpty ? 'Este campo es obligatorio' : null,
-              ),
-
-              TextFormField(
-                controller: _ageController,
-                decoration: const InputDecoration(labelText: 'Edad'),
-                keyboardType: TextInputType.number,
-                validator: (value) => value == null || value.isEmpty ? 'Requerido' : null,
-              ),
-
-              DropdownButtonFormField<String>(
-                decoration: const InputDecoration(labelText: 'Género'),
-                value: _gender,
-                items: _genders.map((g) => DropdownMenuItem(value: g, child: Text(g))).toList(),
-                onChanged: (value) => setState(() => _gender = value),
-                validator: (value) => value == null ? 'Seleccione una opción' : null,
-              ),
-
-              const SizedBox(height: 16),
-              const Text("Salud General", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-
-              Text("Peso: ${_weight.toStringAsFixed(1)} kg"),
-              Slider(
-                min: 30,
-                max: 150,
-                value: _weight,
-                divisions: 120,
-                label: "${_weight.toStringAsFixed(1)} kg",
-                onChanged: (value) => setState(() => _weight = value),
-              ),
-
-              Text("Estatura: ${_height.toStringAsFixed(1)} cm"),
-              Slider(
-                min: 100,
-                max: 220,
-                value: _height,
-                divisions: 120,
-                label: "${_height.toStringAsFixed(1)} cm",
-                onChanged: (value) => setState(() => _height = value),
-              ),
-
-              TextFormField(
-                controller: _conditionsController,
-                decoration: const InputDecoration(
-                  labelText: 'Condiciones médicas (separadas por coma)',
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                Container(
+                  width: 90,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFAEC8E9),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.person, size: 54, color: Color(0xFF1A2639)),
                 ),
-              ),
-
-              TextFormField(
-                controller: _medicationsController,
-                decoration: const InputDecoration(
-                  labelText: 'Medicamentos actuales (separados por coma)',
+                const SizedBox(height: 18),
+                Text(
+                  'Tus datos personales',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1A2639),
+                  ),
                 ),
-              ),
-
-              const SizedBox(height: 16),
-              const Text("Estilo de Vida", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-
-              SwitchListTile(
-                title: const Text("¿Fuma actualmente?"),
-                value: _isSmoker,
-                onChanged: (val) => setState(() => _isSmoker = val),
-              ),
-
-              SwitchListTile(
-                title: const Text("¿Consume alcohol?"),
-                value: _drinksAlcohol,
-                onChanged: (val) => setState(() => _drinksAlcohol = val),
-              ),
-
-              DropdownButtonFormField<String>(
-                decoration: const InputDecoration(labelText: 'Nivel de actividad física'),
-                value: _activityLevel,
-                items: _activityOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-                onChanged: (val) => setState(() => _activityLevel = val!),
-              ),
-
-              const SizedBox(height: 24),
-              Center(
-                child: ElevatedButton.icon(
-                  icon: const Icon(Icons.save),
-                  label: const Text("Guardar Perfil"),
-                  onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
-                      await _saveProfile();
-                    }
-                  },
+                const SizedBox(height: 24),
+                TextFormField(
+                  controller: _nameController,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.person_outline, color: Color(0xFF5D8CAE)),
+                    labelText: 'Nombre completo',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                  validator: (value) => value == null || value.isEmpty ? 'Este campo es obligatorio' : null,
                 ),
-              ),
-            ],
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _ageController,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.cake_outlined, color: Color(0xFF5D8CAE)),
+                    labelText: 'Edad',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                  keyboardType: TextInputType.number,
+                  validator: (value) => value == null || value.isEmpty ? 'Requerido' : null,
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.wc, color: Color(0xFF5D8CAE)),
+                    labelText: 'Género',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                  value: _gender,
+                  items: _genders.map((g) => DropdownMenuItem(value: g, child: Text(g))).toList(),
+                  onChanged: (value) => setState(() => _gender = value),
+                  validator: (value) => value == null ? 'Seleccione una opción' : null,
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Peso: ${_weight.toStringAsFixed(1)} kg"),
+                          Slider(
+                            min: 30,
+                            max: 150,
+                            value: _weight,
+                            divisions: 120,
+                            label: "${_weight.toStringAsFixed(1)} kg",
+                            onChanged: (value) => setState(() => _weight = value),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Estatura: ${_height.toStringAsFixed(1)} cm"),
+                          Slider(
+                            min: 100,
+                            max: 220,
+                            value: _height,
+                            divisions: 120,
+                            label: "${_height.toStringAsFixed(1)} cm",
+                            onChanged: (value) => setState(() => _height = value),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _conditionsController,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.healing, color: Color(0xFF5D8CAE)),
+                    labelText: 'Condiciones médicas (separadas por coma)',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _medicationsController,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.medication_outlined, color: Color(0xFF5D8CAE)),
+                    labelText: 'Medicamentos actuales (separados por coma)',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SwitchListTile(
+                  title: const Text("¿Fuma actualmente?"),
+                  value: _isSmoker,
+                  onChanged: (val) => setState(() => _isSmoker = val),
+                  activeColor: const Color(0xFF1D3557),
+                ),
+                SwitchListTile(
+                  title: const Text("¿Consume alcohol?"),
+                  value: _drinksAlcohol,
+                  onChanged: (val) => setState(() => _drinksAlcohol = val),
+                  activeColor: const Color(0xFF1D3557),
+                ),
+                DropdownButtonFormField<String>(
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.directions_run, color: Color(0xFF5D8CAE)),
+                    labelText: 'Nivel de actividad física',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                  value: _activityLevel,
+                  items: _activityOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                  onChanged: (val) => setState(() => _activityLevel = val!),
+                ),
+                const SizedBox(height: 28),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.save),
+                    label: const Text("Guardar Perfil", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1D3557),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      elevation: 2,
+                    ),
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
+                        await _saveProfile();
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

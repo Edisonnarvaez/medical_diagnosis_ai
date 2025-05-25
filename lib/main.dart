@@ -8,6 +8,8 @@ import 'package:medical_diagnosis_ai/data/models/hive_diagnosis_model.dart';
 import 'package:get/get.dart';
 import 'package:medical_diagnosis_ai/presentation/auth_controller.dart';
 import 'package:medical_diagnosis_ai/presentation/screens/register_screen.dart';
+import 'package:medical_diagnosis_ai/presentation/screens/onboarding_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,9 +19,18 @@ void main() async {
   await Hive.openBox('diagnosis_history');
   final authController = Get.put(AuthController());
 
+  // Verifica si ya se mostró el onboarding
+  final prefs = await SharedPreferences.getInstance();
+  final seenOnboarding = prefs.getBool('seenOnboarding') ?? false;
+
   // Verifica si hay sesión activa
   final isLogged = await authController.checkAuth();
-  runApp(MedicalDiagnosisApp(initialRoute: isLogged ? '/home' : '/login'));
+
+  runApp(MedicalDiagnosisApp(
+    initialRoute: seenOnboarding
+      ? (isLogged ? '/home' : '/login')
+      : '/onboarding',
+  ));
 }
 
 class MedicalDiagnosisApp extends StatelessWidget {
@@ -40,6 +51,7 @@ class MedicalDiagnosisApp extends StatelessWidget {
         GetPage(name: '/login', page: () => LoginScreen()),
         GetPage(name: '/register', page: () => RegisterScreen()),
         GetPage(name: '/home', page: () => const HomeScreen()),
+        GetPage(name: '/onboarding', page: () => const OnboardingScreen()),
       ],
     );
   }
