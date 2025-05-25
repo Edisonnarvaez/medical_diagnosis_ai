@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:medical_diagnosis_ai/presentation/auth_controller.dart';
+import 'package:medical_diagnosis_ai/controllers/auth_controller.dart';
 import 'package:medical_diagnosis_ai/data/repositories/user_profile_repository.dart';
 
 class ProfileScreen extends StatefulWidget {

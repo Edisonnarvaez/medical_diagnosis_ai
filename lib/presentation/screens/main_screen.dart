@@ -2,11 +2,14 @@ import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:medical_diagnosis_ai/presentation/auth_controller.dart';
+import 'package:medical_diagnosis_ai/controllers/auth_controller.dart';
 import 'package:medical_diagnosis_ai/presentation/screens/history_screen.dart';
 import 'package:medical_diagnosis_ai/presentation/screens/symptoms_form_screen.dart';
 import 'package:medical_diagnosis_ai/presentation/screens/userProfileScreen.dart';
 import 'package:medical_diagnosis_ai/data/repositories/user_profile_repository.dart';
+import 'package:medical_diagnosis_ai/data/repositories/appwrite_diagnosis_repository.dart';
+import 'package:hive/hive.dart';
+import 'package:medical_diagnosis_ai/data/models/hive_diagnosis_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -27,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _loadUserName();
     loadRecommendations();
+    _syncRemoteDiagnoses();
   }
 
   Future<void> _loadUserName() async {
@@ -46,6 +50,28 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       allRecommendations = jsonList.map((e) => Map<String, dynamic>.from(e)).toList();
     });
+  }
+
+  Future<void> _syncRemoteDiagnoses() async {
+    final authController = Get.find<AuthController>();
+    final userId = authController.user.value?.$id;
+    if (userId == null) return;
+
+    final appwriteRepo = AppwriteDiagnosisRepository();
+    final remoteDiagnoses = await appwriteRepo.getDiagnoses(userId);
+
+    // Opcional: Limpia Hive y guarda los diagnósticos remotos localmente
+    final box = Hive.box('diagnosis_history');
+    await box.clear();
+    for (final diag in remoteDiagnoses) {
+      box.add(HiveDiagnosisModel(
+        result: diag['result'],
+        confidence: (diag['confidence'] as num).toDouble(),
+        symptoms: (diag['symptoms'] as String).split(',').map((e) => e.trim()).toList(),
+        recommendations: (diag['recommendations'] as String).split(',').map((e) => e.trim()).toList(),
+        createdAt: DateTime.parse(diag['createdAt']),
+      ));
+    }
   }
 
   @override

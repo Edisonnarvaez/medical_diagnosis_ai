@@ -5,6 +5,9 @@ import '../../domain/entities/diagnosis.dart';
 import '../../domain/usecases/get_diagnosis_usecase.dart';
 import 'package:hive/hive.dart';
 import '../../data/models/hive_diagnosis_model.dart';
+import 'package:medical_diagnosis_ai/data/repositories/appwrite_diagnosis_repository.dart';
+import 'package:medical_diagnosis_ai/controllers/auth_controller.dart';
+import 'package:get/get.dart';
 
 class SymptomsFormScreen extends StatefulWidget {
   const SymptomsFormScreen({super.key});
@@ -168,7 +171,8 @@ class DiagnosisResultScreen extends StatelessWidget {
 
   const DiagnosisResultScreen({super.key, required this.symptoms});
 
-  void _saveDiagnosis(Diagnosis diagnosis, List<String> symptoms) async {
+  void _saveDiagnosis(Diagnosis diagnosis, List<String> symptoms, String userId) async {
+    // Guardar en Hive (local)
     final box = Hive.box('diagnosis_history');
     final entry = HiveDiagnosisModel(
       result: diagnosis.result,
@@ -178,11 +182,24 @@ class DiagnosisResultScreen extends StatelessWidget {
       createdAt: DateTime.now(),
     );
     await box.add(entry);
+
+    // Guardar en Appwrite (nube)
+    final appwriteRepo = AppwriteDiagnosisRepository();
+    await appwriteRepo.saveDiagnosis(userId, {
+      'userId': userId,
+      'result': diagnosis.result,
+      'confidence': diagnosis.confidence,
+      'symptoms': symptoms.join(', '),
+      'recommendations': diagnosis.recommendations.join(', '),
+      'createdAt': DateTime.now().toUtc().toIso8601String(),
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final usecase = GetDiagnosisUseCase(GeminiDiagnosisRepository());
+    final authController = Get.find<AuthController>();
+    final userId = authController.user.value?.$id ?? '';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F9FC),
@@ -215,7 +232,7 @@ class DiagnosisResultScreen extends StatelessWidget {
           }
 
           final diagnosis = snapshot.data!;
-          _saveDiagnosis(diagnosis, symptoms);
+          _saveDiagnosis(diagnosis, symptoms, userId);
 
           return Padding(
             padding: const EdgeInsets.all(24.0),

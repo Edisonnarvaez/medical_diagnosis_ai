@@ -89,7 +89,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   width: _currentPage == index ? 24 : 8,
                   height: 8,
                   decoration: BoxDecoration(
-                    color: _currentPage == index ? Colors.blue : Colors.grey[400],
+                    color: _currentPage == index ? Color(0xFF5D8CAE) : Colors.grey[400],
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),

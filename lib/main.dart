@@ -6,7 +6,7 @@ import 'package:medical_diagnosis_ai/presentation/screens/main_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:medical_diagnosis_ai/data/models/hive_diagnosis_model.dart';
 import 'package:get/get.dart';
-import 'package:medical_diagnosis_ai/presentation/auth_controller.dart';
+import 'package:medical_diagnosis_ai/controllers/auth_controller.dart';
 import 'package:medical_diagnosis_ai/presentation/screens/register_screen.dart';
 import 'package:medical_diagnosis_ai/presentation/screens/onboarding_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -43,7 +43,7 @@ class MedicalDiagnosisApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Diagnóstico Médico IA',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF5D8CAE)),
         useMaterial3: false,
       ),
       initialRoute: initialRoute,
