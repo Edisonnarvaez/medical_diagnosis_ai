@@ -16,6 +16,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _conditionsController = TextEditingController();
   final TextEditingController _medicationsController = TextEditingController();
+  final TextEditingController _weightController = TextEditingController();
+  final TextEditingController _heightController = TextEditingController();
 
   String? _gender;
   double _weight = 60;
@@ -52,6 +54,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _isSmoker = data['isSmoker'] ?? false;
         _drinksAlcohol = data['drinksAlcohol'] ?? false;
         _activityLevel = data['activityLevel'] ?? 'Moderada';
+        _weightController.text = _weight.toStringAsFixed(1);
+        _heightController.text = _height.toStringAsFixed(1);
       });
     }
   }
@@ -65,8 +69,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       'name': _nameController.text,
       'age': int.tryParse(_ageController.text),
       'gender': _gender,
-      'weight': _weight,
-      'height': _height,
+      'weight': double.tryParse(_weightController.text.replaceAll(',', '.')),
+      'height': double.tryParse(_heightController.text.replaceAll(',', '.')),
       'conditions': _conditionsController.text,
       'medications': _medicationsController.text,
       'isSmoker': _isSmoker,
@@ -181,36 +185,59 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Peso: ${_weight.toStringAsFixed(1)} kg"),
-                          Slider(
-                            min: 30,
-                            max: 150,
-                            value: _weight,
-                            divisions: 120,
-                            label: "${_weight.toStringAsFixed(1)} kg",
-                            onChanged: (value) => setState(() => _weight = value),
+                      child: TextFormField(
+                        controller: _weightController,
+                        keyboardType: TextInputType.numberWithOptions(decimal: true),
+                        decoration: const InputDecoration(
+                          labelText: "Peso (kg)",
+                          prefixIcon: Icon(Icons.monitor_weight, color: Color(0xFF5D8CAE)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(14)),
                           ),
-                        ],
+                          filled: true,
+                          fillColor: Colors.white,
+                        ),
+                        validator: (val) {
+                          final parsed = double.tryParse(val!.replaceAll(',', '.'));
+                          if (parsed == null || parsed < 30 || parsed > 150) {
+                            return 'Ingrese un peso válido (30-150)';
+                          }
+                          return null;
+                        },
+                        onChanged: (val) {
+                          final parsed = double.tryParse(val.replaceAll(',', '.'));
+                          if (parsed != null && parsed >= 30 && parsed <= 150) {
+                            setState(() => _weight = parsed);
+                          }
+                        },
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Estatura: ${_height.toStringAsFixed(1)} cm"),
-                          Slider(
-                            min: 100,
-                            max: 220,
-                            value: _height,
-                            divisions: 120,
-                            label: "${_height.toStringAsFixed(1)} cm",
-                            onChanged: (value) => setState(() => _height = value),
+                      child: TextFormField(
+                        controller: _heightController,
+                        decoration: const InputDecoration(
+                          labelText: "Estatura (cm)",
+                          prefixIcon: Icon(Icons.height, color: Color(0xFF5D8CAE)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(14)),
                           ),
-                        ],
+                          filled: true,
+                          fillColor: Colors.white,
+                        ),
+                        validator: (val) {
+                          final parsed = double.tryParse(val!.replaceAll(',', '.'));
+                          if (parsed == null || parsed < 100 || parsed > 220) {
+                            return 'Ingrese una estatura válida (100-220)';
+                          }
+                          return null;
+                        },
+                        onChanged: (val) {
+                          final parsed = double.tryParse(val.replaceAll(',', '.'));
+                          if (parsed != null && parsed >= 100 && parsed <= 220) {
+                            setState(() => _height = parsed);
+                          }
+                        },
                       ),
                     ),
                   ],
