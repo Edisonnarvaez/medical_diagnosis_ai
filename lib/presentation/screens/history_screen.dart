@@ -65,6 +65,42 @@ class HistoryScreen extends StatelessWidget {
                     ],
                   ),
                   isThreeLine: true,
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        title: const Text('Detalle de la Consulta'),
+                        content: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Diagnóstico:', style: TextStyle(fontWeight: FontWeight.bold)),
+                              Text(entry.result),
+                              const SizedBox(height: 12),
+                              Text('Síntomas:', style: TextStyle(fontWeight: FontWeight.bold)),
+                              Text(entry.symptoms.join(', ')),
+                              const SizedBox(height: 12),
+                              Text('Nivel de confianza:', style: TextStyle(fontWeight: FontWeight.bold)),
+                              Text('${(entry.confidence * 100).toStringAsFixed(1)}%'),
+                              const SizedBox(height: 12),
+                              Text('Fecha:', style: TextStyle(fontWeight: FontWeight.bold)),
+                              Text('${entry.createdAt.toLocal()}'),
+                              const SizedBox(height: 12),
+                              Text('Recomendaciones:', style: TextStyle(fontWeight: FontWeight.bold)),
+                              ...entry.recommendations.map((r) => Text('- $r')).toList(),
+                            ],
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cerrar'),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               );
             },

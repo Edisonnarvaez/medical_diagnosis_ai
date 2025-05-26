@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import 'package:medical_diagnosis_ai/core/config/app_config.dart';
 import 'package:appwrite/models.dart';
+import 'package:medical_diagnosis_ai/data/repositories/user_profile_repository.dart';
 
 class AuthController extends GetxController {
   final Account account = Account(AppwriteConfig.getClient());
@@ -42,7 +43,16 @@ class AuthController extends GetxController {
       );
       final userData = await account.get();
       user.value = userData;
-      Get.offNamed('/home');
+
+      // Verifica si el perfil está completo
+      final profileRepo = UserProfileRepository();
+      final isComplete = await profileRepo.isProfileComplete(userData.$id);
+
+      if (isComplete) {
+        Get.offNamed('/home');
+      } else {
+        Get.offNamed('/profile'); // Asegúrate de tener esta ruta
+      }
     } catch (e) {
       Get.snackbar('Error', e.toString());
     }

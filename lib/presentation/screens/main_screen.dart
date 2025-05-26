@@ -70,6 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
         symptoms: (diag['symptoms'] as String).split(',').map((e) => e.trim()).toList(),
         recommendations: (diag['recommendations'] as String).split(',').map((e) => e.trim()).toList(),
         createdAt: DateTime.parse(diag['createdAt']),
+        userId: userId,
       ));
     }
   }
@@ -340,12 +341,17 @@ class RecommendationItem extends StatelessWidget {
           ),
         ),
         SizedBox(width: 20),
-        Text(
-          text,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w500,
-            color: Color(0xFF1A2639),
+        Expanded( // <-- ¡Agrega esto!
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF1A2639),
+            ),
+            //overflow: TextOverflow.ellipsis, // Opcional: puntos suspensivos si es muy largo
+            //maxLines: 3, // Opcional: máximo 2 líneas
+            softWrap: true,
           ),
         ),
       ],

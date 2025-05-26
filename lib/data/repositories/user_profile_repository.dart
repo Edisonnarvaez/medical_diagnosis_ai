@@ -43,4 +43,15 @@ class UserProfileRepository {
       return null;
     }
   }
+
+  Future<bool> isProfileComplete(String userId) async {
+    final profile = await getProfile(userId);
+    if (profile == null) return false;
+    // Ajusta los campos requeridos según tu lógica
+    return (profile['name'] ?? '').toString().isNotEmpty &&
+           (profile['age'] ?? '').toString().isNotEmpty &&
+           (profile['gender'] ?? '').toString().isNotEmpty &&
+           (profile['weight'] ?? '').toString().isNotEmpty &&
+           (profile['height'] ?? '').toString().isNotEmpty;
+  }
 }

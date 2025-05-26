@@ -22,13 +22,14 @@ class HiveDiagnosisModelAdapter extends TypeAdapter<HiveDiagnosisModel> {
       symptoms: (fields[2] as List).cast<String>(),
       recommendations: (fields[3] as List).cast<String>(),
       createdAt: fields[4] as DateTime,
+      userId: fields[5] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, HiveDiagnosisModel obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.result)
       ..writeByte(1)
@@ -38,7 +39,9 @@ class HiveDiagnosisModelAdapter extends TypeAdapter<HiveDiagnosisModel> {
       ..writeByte(3)
       ..write(obj.recommendations)
       ..writeByte(4)
-      ..write(obj.createdAt);
+      ..write(obj.createdAt)
+      ..writeByte(5)
+      ..write(obj.userId);
   }
 
   @override

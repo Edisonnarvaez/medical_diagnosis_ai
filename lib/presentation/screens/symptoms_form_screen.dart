@@ -180,6 +180,7 @@ class DiagnosisResultScreen extends StatelessWidget {
       symptoms: symptoms,
       recommendations: diagnosis.recommendations,
       createdAt: DateTime.now(),
+      userId: userId,
     );
     await box.add(entry);
 
@@ -264,48 +265,55 @@ class DiagnosisResultScreen extends StatelessWidget {
                   color: Colors.white,
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Síntomas ingresados:',
-                          style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1A2639)),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: MediaQuery.of(context).size.height * 0.4, // Ajusta el alto máximo
+                      ),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Síntomas ingresados:',
+                              style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1A2639)),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              symptoms.join(', '),
+                              style: const TextStyle(color: Colors.black87),
+                            ),
+                            const SizedBox(height: 18),
+                            Text(
+                              'Diagnóstico: ${diagnosis.result}',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF1D3557),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Nivel de certeza: ${(diagnosis.confidence * 100).toStringAsFixed(1)}%',
+                              style: const TextStyle(color: Colors.black87),
+                            ),
+                            const SizedBox(height: 18),
+                            const Text(
+                              'Recomendaciones:',
+                              style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1A2639)),
+                            ),
+                            const SizedBox(height: 6),
+                            ...diagnosis.recommendations.map(
+                              (r) => Row(
+                                children: [
+                                  const Icon(Icons.check_circle, color: Color(0xFF5D8CAE), size: 20),
+                                  const SizedBox(width: 8),
+                                  Expanded(child: Text(r, style: const TextStyle(color: Colors.black87))),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          symptoms.join(', '),
-                          style: const TextStyle(color: Colors.black87),
-                        ),
-                        const SizedBox(height: 18),
-                        Text(
-                          'Diagnóstico: ${diagnosis.result}',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF1D3557),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Nivel de certeza: ${(diagnosis.confidence * 100).toStringAsFixed(1)}%',
-                          style: const TextStyle(color: Colors.black87),
-                        ),
-                        const SizedBox(height: 18),
-                        const Text(
-                          'Recomendaciones:',
-                          style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1A2639)),
-                        ),
-                        const SizedBox(height: 6),
-                        ...diagnosis.recommendations.map(
-                          (r) => Row(
-                            children: [
-                              const Icon(Icons.check_circle, color: Color(0xFF5D8CAE), size: 20),
-                              const SizedBox(width: 8),
-                              Expanded(child: Text(r, style: const TextStyle(color: Colors.black87))),
-                            ],
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),

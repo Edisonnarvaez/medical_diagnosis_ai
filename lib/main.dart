@@ -10,6 +10,7 @@ import 'package:medical_diagnosis_ai/controllers/auth_controller.dart';
 import 'package:medical_diagnosis_ai/presentation/screens/register_screen.dart';
 import 'package:medical_diagnosis_ai/presentation/screens/onboarding_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:medical_diagnosis_ai/presentation/screens/userProfileScreen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,6 +53,7 @@ class MedicalDiagnosisApp extends StatelessWidget {
         GetPage(name: '/register', page: () => RegisterScreen()),
         GetPage(name: '/home', page: () => const HomeScreen()),
         GetPage(name: '/onboarding', page: () => const OnboardingScreen()),
+        GetPage(name: '/profile', page: () => const ProfileScreen()), // <--- agrega esto
       ],
     );
   }

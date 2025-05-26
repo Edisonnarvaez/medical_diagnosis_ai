@@ -19,11 +19,15 @@ class HiveDiagnosisModel extends HiveObject {
   @HiveField(4)
   DateTime createdAt;
 
+  @HiveField(5) // Nuevo campo
+  String userId;
+
   HiveDiagnosisModel({
     required this.result,
     required this.confidence,
     required this.symptoms,
     required this.recommendations,
     required this.createdAt,
+    required this.userId, // Nuevo campo
   });
 }
