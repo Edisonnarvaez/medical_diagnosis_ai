@@ -240,105 +240,156 @@ class DiagnosisResultScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Container(
-                  width: 90,
-                  height: 90,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFAEC8E9),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.medical_services, size: 54, color: Color(0xFF1A2639)),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Diagnóstico IA',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A2639),
-                  ),
-                ),
-                const SizedBox(height: 18),
-                Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 2,
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxHeight: MediaQuery.of(context).size.height * 0.4, // Ajusta el alto máximo
-                      ),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Síntomas ingresados:',
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1A2639)),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              symptoms.join(', '),
-                              style: const TextStyle(color: Colors.black87),
-                            ),
-                            const SizedBox(height: 18),
-                            Text(
-                              'Diagnóstico: ${diagnosis.result}',
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF1D3557),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Nivel de certeza: ${(diagnosis.confidence * 100).toStringAsFixed(1)}%',
-                              style: const TextStyle(color: Colors.black87),
-                            ),
-                            const SizedBox(height: 18),
-                            const Text(
-                              'Recomendaciones:',
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1A2639)),
-                            ),
-                            const SizedBox(height: 6),
-                            ...diagnosis.recommendations.map(
-                              (r) => Row(
-                                children: [
-                                  const Icon(Icons.check_circle, color: Color(0xFF5D8CAE), size: 20),
-                                  const SizedBox(width: 8),
-                                  Expanded(child: Text(r, style: const TextStyle(color: Colors.black87))),
-                                ],
-                              ),
-                            ),
-                          ],
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 90,
+                          height: 90,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFAEC8E9),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.medical_services, size: 54, color: Color(0xFF1A2639)),
                         ),
-                      ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Diagnóstico IA',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1A2639),
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+                        Card(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          elevation: 2,
+                          color: Colors.white,
+                          child: Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Síntomas ingresados:',
+                                  style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1A2639)),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  symptoms.join(', '),
+                                  style: const TextStyle(color: Colors.black87),
+                                ),
+                                const SizedBox(height: 18),
+                                Text(
+                                  'Diagnóstico: ${diagnosis.result}',
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF1D3557),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Nivel de certeza: ${(diagnosis.confidence * 100).toStringAsFixed(1)}%',
+                                  style: const TextStyle(color: Colors.black87),
+                                ),
+                                const SizedBox(height: 18),
+                                const Text(
+                                  'Recomendaciones:',
+                                  style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1A2639)),
+                                ),
+                                const SizedBox(height: 6),
+                                ...diagnosis.recommendations.map(
+                                  (r) => Row(
+                                    children: [
+                                      const Icon(Icons.check_circle, color: Color(0xFF5D8CAE), size: 20),
+                                      const SizedBox(width: 8),
+                                      Expanded(child: Text(r, style: const TextStyle(color: Colors.black87))),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
                     ),
                   ),
                 ),
-                const Spacer(),
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.history),
-                    label: const Text('Ver historial médico', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF5D8CAE),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                // Botones fijos abajo
+                Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.history),
+                        label: const Text('Ver historial médico', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF5D8CAE),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 2,
+                        ),
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => const HistoryScreen()),
+                          );
+                        },
                       ),
-                      elevation: 2,
                     ),
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => const HistoryScreen()),
-                      );
-                    },
-                  ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.add_circle_outline),
+                        label: const Text('Crear otro análisis', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF1D3557),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 2,
+                        ),
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => const SymptomsFormScreen()),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: OutlinedButton.icon(
+                        icon: const Icon(Icons.home, color: Color(0xFF1D3557)),
+                        label: const Text('Volver al menú principal', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1D3557))),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Color(0xFF1D3557), width: 2),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          foregroundColor: const Color(0xFF1D3557),
+                          backgroundColor: Colors.white,
+                          elevation: 0,
+                        ),
+                        onPressed: () {
+                          Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
