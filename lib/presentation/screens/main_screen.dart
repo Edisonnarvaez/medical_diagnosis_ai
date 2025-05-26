@@ -106,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -271,35 +271,31 @@ class _HomeScreenState extends State<HomeScreen> {
               Text(
                 'Recomendaciones Generales',
                 style: TextStyle(
-                  fontSize: 22, // Más pequeño para móviles
+                  fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF1A2639),
                 ),
               ),
               
               SizedBox(height: 20),
-              Expanded(
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: recommendations.length,
-                  separatorBuilder: (_, __) => SizedBox(height: 16),
-                  itemBuilder: (context, index) {
-                    final rec = recommendations[index];
-                    if (rec == null) return SizedBox.shrink();
-                    return RecommendationItem(
-                      icon: getIconData(rec['icon']),
-                      text: rec['text'],
-                      iconColor: Color(int.parse(rec['iconColor'].replaceFirst('#', '0xFF'))),
-                      iconBgColor: Color(int.parse(rec['iconBgColor'].replaceFirst('#', '0xFF'))),
-                    );
-                  },
-                ),
+              
+              // Aquí la lista de recomendaciones ocupa todo el ancho y crece verticalmente
+              ListView.separated(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: recommendations.length,
+                separatorBuilder: (_, __) => SizedBox(height: 16),
+                itemBuilder: (context, index) {
+                  final rec = recommendations[index];
+                  if (rec == null) return SizedBox.shrink();
+                  return RecommendationItem(
+                    icon: getIconData(rec['icon']),
+                    text: rec['text'],
+                    iconColor: Color(int.parse(rec['iconColor'].replaceFirst('#', '0xFF'))),
+                    iconBgColor: Color(int.parse(rec['iconBgColor'].replaceFirst('#', '0xFF'))),
+                  );
+                },
               ),
-              
-              Spacer(),
-              
-            
             ],
           ),
         ),
