@@ -82,10 +82,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Perfil guardado correctamente')),
       );
+      // Redirige al menú principal solo si se guardó correctamente
+      Future.delayed(const Duration(milliseconds: 500), () {
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+      });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error al guardar perfil: $e')),
       );
+      // No navega, se queda en la pantalla de edición
     }
   }
 
