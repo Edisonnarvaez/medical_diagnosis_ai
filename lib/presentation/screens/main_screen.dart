@@ -102,7 +102,16 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('Inicio'),
         actions: [
-          
+          // IconButton(
+          //   icon: const Icon(Icons.account_circle),
+          //   tooltip: 'Perfil',
+          //   onPressed: () {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(builder: (_) => const ProfileScreen()),
+          //     ).then((_) => _loadUserName());
+          //   },
+          // ),
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Cerrar sesión',
@@ -331,9 +340,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                   
-                  SizedBox(height: 20),
+                  //SizedBox(height: 20),
                   
-                  // Campo para editar la URL de la foto de perfil
                   
                 ],
               ),

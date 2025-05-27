@@ -395,10 +395,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       if (_formKey.currentState!.validate()) {
                         final authController = Get.find<AuthController>();
                         final userId = authController.user.value?.$id;
-                        await _saveProfile();
+
+                        // Si hay una imagen nueva, súbela primero
                         if (_pickedImage != null && userId != null) {
                           _photoUrl = await uploadProfileImage(_pickedImage!, userId);
+                          setState(() {}); // Actualiza la UI si quieres mostrar la nueva foto
                         }
+
+                        await _saveProfile();
                       }
                     },
                   ),
