@@ -23,6 +23,7 @@ class HiveDiagnosisModelAdapter extends TypeAdapter<HiveDiagnosisModel> {
       recommendations: (fields[3] as List).cast<String>(),
       createdAt: fields[4] as DateTime,
       userId: fields[5] as String,
+      
     );
   }
 
