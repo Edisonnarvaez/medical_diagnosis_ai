@@ -43,6 +43,7 @@ dependencies:
   flutter_dotenv: ^5.2.1
   get: ^4.6.6
   appwrite: ^16.1.0
+  image_picker: ^1.0.7 # Si usas Firebase Storage o Appwrite para subir la imagen, agrega aquí la dependencia correspondiente
 
 dev_dependencies:
   flutter_test:

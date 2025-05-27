@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -20,6 +21,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String? userName;
+  String? userPhotoUrl;
   final UserProfileRepository _profileRepo = UserProfileRepository();
 
   // Lista de recomendaciones posibles
@@ -40,6 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final data = await _profileRepo.getProfile(userId);
       setState(() {
         userName = data?['name'] ?? 'Usuario';
+        userPhotoUrl = data?['photoUrl']; // Cargar URL de la foto
       });
     }
   }
@@ -75,17 +78,21 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  List<Map<String, dynamic>> getRandomRecommendations(int count) {
+    final random = Random();
+    final recs = List<Map<String, dynamic>>.from(allRecommendations);
+    recs.shuffle(random);
+    return recs.take(count).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final authController = Get.find<AuthController>();
 
     final today = DateTime.now().day;
-    final recommendations = List.generate(
-      3,
-      (i) => allRecommendations.isNotEmpty
-          ? allRecommendations[(today + i) % allRecommendations.length]
-          : null,
-    );
+    final recommendations = allRecommendations.isNotEmpty
+        ? getRandomRecommendations(3)
+        : [];
 
     if (allRecommendations.isEmpty) {
       return const Center(child: CircularProgressIndicator());
@@ -95,6 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('Inicio'),
         actions: [
+          
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Cerrar sesión',
@@ -105,198 +113,231 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header con saludo y avatar
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFe0ecff), Color(0xFFf6f9fc)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: SafeArea(
+          child: RefreshIndicator(
+            onRefresh: () async {
+              await _loadUserName();
+              await loadRecommendations();
+              setState(() {});
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Usa Expanded para que el texto se adapte
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Bienvenido,',
-                          style: TextStyle(
-                            fontSize: 28, // Más pequeño para móviles
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF1A2639),
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          softWrap: false,
-                        ),
-                        Text(
-                          userName ?? 'Usuario',
-                          style: TextStyle(
-                            fontSize: 28, // Más pequeño para móviles
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF1A2639),
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          softWrap: false,
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(width: 16), // Espacio entre texto y avatar
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const ProfileScreen()),
-                      ).then((_) => _loadUserName());
-                    },
-                    child: Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: Color(0xFFAEC8E9),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.person,
-                        size: 36,
-                        color: Color(0xFF3A5B83),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              
-              SizedBox(height: 50),
-              
-              // Botones principales
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  // Botón de Nuevo Análisis
-                  Column(
+                  // Header con saludo y avatar
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                        'Nuevo',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w500,
+                      // Usa Expanded para que el texto se adapte
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Bienvenido,',
+                              style: TextStyle(
+                                fontSize: 28, // Más pequeño para móviles
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF1A2639),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              softWrap: false,
+                            ),
+                            Text(
+                              userName ?? 'Usuario',
+                              style: TextStyle(
+                                fontSize: 28, // Más pequeño para móviles
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF1A2639),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              softWrap: false,
+                            ),
+                          ],
                         ),
                       ),
-                      Text(
-                        'análisis',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      
-                      SizedBox(height: 15),
+                      SizedBox(width: 16), // Espacio entre texto y avatar
                       GestureDetector(
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                              builder: (_) => const SymptomsFormScreen(),
-                            ),
-                          );
+                            MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                          ).then((_) => _loadUserName());
                         },
                         child: Container(
-                          width: 80,
-                          height: 80,
+                          width: 60,
+                          height: 60,
                           decoration: BoxDecoration(
-                            color: Color(0xFF1D3557),
+                            color: Color(0xFFAEC8E9),
                             shape: BoxShape.circle,
+                            image: (userPhotoUrl != null && userPhotoUrl!.isNotEmpty)
+                                ? DecorationImage(
+                                    image: NetworkImage(userPhotoUrl!),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
                           ),
-                          child: Icon(
-                            Icons.add,
-                            size: 40,
-                            color: Colors.white,
-                          ),
+                          child: (userPhotoUrl == null || userPhotoUrl!.isEmpty)
+                              ? Icon(Icons.person, size: 36, color: Color(0xFF3A5B83))
+                              : null,
                         ),
                       ),
                     ],
                   ),
                   
-                  // Botón de Ver Historial
-                  Column(
+                  SizedBox(height: 50),
+                  
+                  // Botones principales
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Text(
-                        'Ver',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      Text(
-                        'Historial',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      SizedBox(height: 15),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => const HistoryScreen()),
-                          );
-                        },
-                        child: Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: Color(0xFF1D3557),
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Color(0xFF1D3557), width: 2),
+                      // Botón de Nuevo Análisis
+                      Column(
+                        children: [
+                          Text(
+                            'Nuevo',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                          child: Icon(
-                            Icons.access_time,
-                            size: 40,
-                            color: Colors.white,
+                          Text(
+                            'análisis',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                        ),
+                          
+                          SizedBox(height: 15),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const SymptomsFormScreen(),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              width: 80,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                color: Color(0xFF1D3557),
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.15),
+                                    blurRadius: 8,
+                                    offset: Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                Icons.add,
+                                size: 40,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      // Botón de Ver Historial
+                      Column(
+                        children: [
+                          Text(
+                            'Ver',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            'Historial',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          SizedBox(height: 15),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const HistoryScreen()),
+                              );
+                            },
+                            child: Container(
+                              width: 80,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                color: Color(0xFF1D3557),
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Color(0xFF1D3557), width: 2),
+                              ),
+                              child: Icon(
+                                Icons.access_time,
+                                size: 40,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
+                  
+                  SizedBox(height: 60),
+                  
+                  // Sección de Recomendaciones
+                  Text(
+                    'Recomendaciones Generales',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1A2639),
+                    ),
+                  ),
+                  
+                  SizedBox(height: 20),
+                  
+                  // Aquí la lista de recomendaciones ocupa todo el ancho y crece verticalmente
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: recommendations.length,
+                    separatorBuilder: (_, __) => SizedBox(height: 16),
+                    itemBuilder: (context, index) {
+                      final rec = recommendations[index];
+                      if (rec == null) return SizedBox.shrink();
+                      return RecommendationItem(
+                        icon: getIconData(rec['icon']),
+                        text: rec['text'],
+                        iconColor: Color(int.parse(rec['iconColor'].replaceFirst('#', '0xFF'))),
+                        iconBgColor: Color(int.parse(rec['iconBgColor'].replaceFirst('#', '0xFF'))),
+                      );
+                    },
+                  ),
+                  
+                  SizedBox(height: 20),
+                  
+                  // Campo para editar la URL de la foto de perfil
+                  
                 ],
               ),
-              
-              SizedBox(height: 60),
-              
-              // Sección de Recomendaciones
-              Text(
-                'Recomendaciones Generales',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1A2639),
-                ),
-              ),
-              
-              SizedBox(height: 20),
-              
-              // Aquí la lista de recomendaciones ocupa todo el ancho y crece verticalmente
-              ListView.separated(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: recommendations.length,
-                separatorBuilder: (_, __) => SizedBox(height: 16),
-                itemBuilder: (context, index) {
-                  final rec = recommendations[index];
-                  if (rec == null) return SizedBox.shrink();
-                  return RecommendationItem(
-                    icon: getIconData(rec['icon']),
-                    text: rec['text'],
-                    iconColor: Color(int.parse(rec['iconColor'].replaceFirst('#', '0xFF'))),
-                    iconBgColor: Color(int.parse(rec['iconBgColor'].replaceFirst('#', '0xFF'))),
-                  );
-                },
-              ),
-            ],
+            ),
           ),
         ),
       ),

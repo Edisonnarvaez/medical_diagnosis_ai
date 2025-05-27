@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:medical_diagnosis_ai/controllers/auth_controller.dart';
+import 'package:medical_diagnosis_ai/data/repositories/appwrite_diagnosis_repository.dart';
 import 'package:medical_diagnosis_ai/data/repositories/user_profile_repository.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -25,6 +30,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isSmoker = false;
   bool _drinksAlcohol = false;
   String _activityLevel = 'Moderada';
+  String _photoUrl = '';
+
+  File? _pickedImage;
+  final ImagePicker _picker = ImagePicker();
 
   final List<String> _genders = ['Masculino', 'Femenino', 'Otro'];
   final List<String> _activityOptions = ['Sedentaria', 'Moderada', 'Activa'];
@@ -54,6 +63,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _isSmoker = data['isSmoker'] ?? false;
         _drinksAlcohol = data['drinksAlcohol'] ?? false;
         _activityLevel = data['activityLevel'] ?? 'Moderada';
+        _photoUrl = data['photoUrl'] ?? '';
         _weightController.text = _weight.toStringAsFixed(1);
         _heightController.text = _height.toStringAsFixed(1);
       });
@@ -76,6 +86,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       'isSmoker': _isSmoker,
       'drinksAlcohol': _drinksAlcohol,
       'activityLevel': _activityLevel,
+      'photoUrl': _photoUrl,
     };
     try {
       await _profileRepo.saveProfile(userId, data);
@@ -91,6 +102,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
         SnackBar(content: Text('Error al guardar perfil: $e')),
       );
       // No navega, se queda en la pantalla de edición
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final authController = Get.find<AuthController>();
+    final userId = authController.user.value?.$id;
+    if (userId == null) return;
+    final pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+    );
+    if (pickedFile != null) {
+      if (kIsWeb) {
+        // WEB: Usa bytes
+        final bytes = await pickedFile.readAsBytes();
+        final url = await uploadProfileImageWeb(bytes, pickedFile.name, userId);
+        setState(() {
+          _photoUrl = url;
+          _pickedImage = null; // No uses File en web
+        });
+      } else {
+        // MÓVIL: Usa File
+        setState(() {
+          _pickedImage = File(pickedFile.path);
+          _photoUrl = '';
+        });
+        final url = await uploadProfileImage(_pickedImage!, userId);
+        setState(() {
+          _photoUrl = url;
+        });
+      }
     }
   }
 
@@ -123,14 +165,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
             key: _formKey,
             child: Column(
               children: [
-                Container(
-                  width: 90,
-                  height: 90,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFAEC8E9),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.person, size: 54, color: Color(0xFF1A2639)),
+                Stack(
+                  alignment: Alignment.bottomRight,
+                  children: [
+                    Container(
+                      width: 90,
+                      height: 90,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFAEC8E9),
+                        shape: BoxShape.circle,
+                        image: _pickedImage != null
+                            ? DecorationImage(
+                                image: FileImage(_pickedImage!),
+                                fit: BoxFit.cover,
+                              )
+                            : (_photoUrl.isNotEmpty
+                                ? DecorationImage(
+                                    image: NetworkImage(_photoUrl),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null),
+                      ),
+                      child: (_pickedImage == null && _photoUrl.isEmpty)
+                          ? const Icon(Icons.person, size: 54, color: Color(0xFF1A2639))
+                          : null,
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: InkWell(
+                        onTap: _pickImage,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Color(0xFF1D3557), width: 2),
+                          ),
+                          padding: const EdgeInsets.all(6),
+                          child: const Icon(Icons.camera_alt, size: 22, color: Color(0xFF1D3557)),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 18),
                 Text(
@@ -300,7 +376,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   items: _activityOptions.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
                   onChanged: (val) => setState(() => _activityLevel = val!),
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
                   height: 52,
@@ -317,7 +393,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
+                        final authController = Get.find<AuthController>();
+                        final userId = authController.user.value?.$id;
                         await _saveProfile();
+                        if (_pickedImage != null && userId != null) {
+                          _photoUrl = await uploadProfileImage(_pickedImage!, userId);
+                        }
                       }
                     },
                   ),

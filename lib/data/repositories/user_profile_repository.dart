@@ -3,9 +3,11 @@ import 'package:appwrite/models.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class UserProfileRepository {
-  final Databases db = Databases(Client()
-    ..setEndpoint(dotenv.env['APPWRITE_ENDPOINT']!)
-    ..setProject(dotenv.env['APPWRITE_PROJECT_ID']!));
+  final Databases db = Databases(
+    Client()
+      ..setEndpoint(dotenv.env['APPWRITE_ENDPOINT']!)
+      ..setProject(dotenv.env['APPWRITE_PROJECT_ID']!),
+  );
   final String databaseId = dotenv.env['APPWRITE_DATABASE_ID']!;
   final String collectionId = dotenv.env['APPWRITE_PROFILES_COLLECTION_ID']!;
 
@@ -49,9 +51,9 @@ class UserProfileRepository {
     if (profile == null) return false;
     // Ajusta los campos requeridos según tu lógica
     return (profile['name'] ?? '').toString().isNotEmpty &&
-           (profile['age'] ?? '').toString().isNotEmpty &&
-           (profile['gender'] ?? '').toString().isNotEmpty &&
-           (profile['weight'] ?? '').toString().isNotEmpty &&
-           (profile['height'] ?? '').toString().isNotEmpty;
+        (profile['age'] ?? '').toString().isNotEmpty &&
+        (profile['gender'] ?? '').toString().isNotEmpty &&
+        (profile['weight'] ?? '').toString().isNotEmpty &&
+        (profile['height'] ?? '').toString().isNotEmpty;
   }
 }
