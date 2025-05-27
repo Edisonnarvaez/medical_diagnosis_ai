@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:get/get.dart';
+import 'package:timeago/timeago.dart' as timeago;
 import '../../data/models/hive_diagnosis_model.dart';
 import '../../controllers/auth_controller.dart';
 
@@ -69,7 +70,7 @@ class HistoryScreen extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text('Síntomas: ${entry.symptoms.join(', ')}'),
                       Text('Confianza: ${(entry.confidence * 100).toStringAsFixed(1)}%'),
-                      Text('Fecha: ${entry.createdAt.toLocal()}'),
+                      Text('Fecha: ${timeago.format(entry.createdAt)}'),
                     ],
                   ),
                   isThreeLine: true,
@@ -93,7 +94,7 @@ class HistoryScreen extends StatelessWidget {
                               Text('${(entry.confidence * 100).toStringAsFixed(1)}%'),
                               const SizedBox(height: 12),
                               Text('Fecha:', style: TextStyle(fontWeight: FontWeight.bold)),
-                              Text('${entry.createdAt.toLocal()}'),
+                              Text('${timeago.format(entry.createdAt)}'),
                               const SizedBox(height: 12),
                               Text('Recomendaciones:', style: TextStyle(fontWeight: FontWeight.bold)),
                               ...entry.recommendations.map((r) => Text('- $r')).toList(),

@@ -8,6 +8,7 @@ import '../../data/models/hive_diagnosis_model.dart';
 import 'package:medical_diagnosis_ai/data/repositories/appwrite_diagnosis_repository.dart';
 import 'package:medical_diagnosis_ai/controllers/auth_controller.dart';
 import 'package:get/get.dart';
+import 'package:share_plus/share_plus.dart';
 
 class SymptomsFormScreen extends StatefulWidget {
   const SymptomsFormScreen({super.key});
@@ -48,6 +49,12 @@ class _SymptomsFormScreenState extends State<SymptomsFormScreen> {
     );
   }
 
+  final List<String> suggestedSymptoms = [
+    'Fiebre', 'Tos', 'Dolor de cabeza', 'Náuseas', 'Fatiga', 'Dolor muscular'
+  ];
+
+  bool isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,6 +69,29 @@ class _SymptomsFormScreenState extends State<SymptomsFormScreen> {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
+            // 1. Síntomas sugeridos arriba
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Síntomas sugeridos:',
+                style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1A2639)),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: suggestedSymptoms.map((symptom) => ActionChip(
+                label: Text(symptom),
+                onPressed: () {
+                  if (!selectedSymptoms.contains(symptom)) {
+                    setState(() => selectedSymptoms.add(symptom));
+                  }
+                },
+              )).toList(),
+            ),
+            const SizedBox(height: 18),
+
+            // 2. Campo para agregar síntoma manualmente
             Form(
               key: _formKey,
               child: Row(
@@ -98,6 +128,8 @@ class _SymptomsFormScreenState extends State<SymptomsFormScreen> {
               ),
             ),
             const SizedBox(height: 16),
+
+            // 3. Chips de síntomas seleccionados
             Wrap(
               spacing: 8.0,
               children: selectedSymptoms
@@ -115,14 +147,35 @@ class _SymptomsFormScreenState extends State<SymptomsFormScreen> {
                   )
                   .toList(),
             ),
+
+            // 4. Botón "Eliminar todos" justo debajo de los chips seleccionados
+            if (selectedSymptoms.isNotEmpty)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  icon: const Icon(Icons.delete_forever),
+                  label: const Text('Eliminar todos'),
+                  onPressed: () => setState(() => selectedSymptoms.clear()),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.red,
+                  ),
+                ),
+              ),
+
             const Spacer(),
+
+            // 5. Botón Analizar y Ver historial
             SizedBox(
               width: double.infinity,
               height: 52,
               child: ElevatedButton.icon(
-                onPressed: _submitSymptoms,
-                icon: const Icon(Icons.search),
-                label: const Text('Analizar síntomas', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                onPressed: isLoading ? null : _submitSymptoms,
+                icon: isLoading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Icon(Icons.search),
+                label: isLoading
+                  ? const Text('Analizando...', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))
+                  : const Text('Analizar síntomas', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1D3557),
                   foregroundColor: Colors.white,
@@ -194,6 +247,12 @@ class DiagnosisResultScreen extends StatelessWidget {
       'recommendations': diagnosis.recommendations.join(', '),
       'createdAt': DateTime.now().toUtc().toIso8601String(),
     });
+  }
+
+  Color getConfidenceColor(double confidence) {
+    if (confidence >= 0.8) return Colors.green;
+    if (confidence >= 0.5) return Colors.orange;
+    return Colors.red;
   }
 
   @override
@@ -323,71 +382,57 @@ class DiagnosisResultScreen extends StatelessWidget {
                 // Botones fijos abajo
                 Column(
                   children: [
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton.icon(
-                        icon: const Icon(Icons.history),
-                        label: const Text('Ver historial médico', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF5D8CAE),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Tooltip(
+                          message: 'Compartir resultado',
+                          child: IconButton(
+                            icon: const Icon(Icons.share, color: Color(0xFF43A047), size: 28),
+                            onPressed: () {
+                              final shareText =
+                                  'Diagnóstico IA: ${diagnosis.result}\n'
+                                  'Nivel de certeza: ${(diagnosis.confidence * 100).toStringAsFixed(1)}%\n'
+                                  'Síntomas: ${symptoms.join(', ')}\n'
+                                  'Recomendaciones: ${diagnosis.recommendations.join(', ')}';
+                              Share.share(shareText);
+                            },
                           ),
-                          elevation: 2,
                         ),
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (_) => const HistoryScreen()),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton.icon(
-                        icon: const Icon(Icons.add_circle_outline),
-                        label: const Text('Crear otro análisis', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1D3557),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                        Tooltip(
+                          message: 'Ver historial médico',
+                          child: IconButton(
+                            icon: const Icon(Icons.history, color: Color(0xFF5D8CAE), size: 28),
+                            onPressed: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (_) => const HistoryScreen()),
+                              );
+                            },
                           ),
-                          elevation: 2,
                         ),
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (_) => const SymptomsFormScreen()),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: OutlinedButton.icon(
-                        icon: const Icon(Icons.home, color: Color(0xFF1D3557)),
-                        label: const Text('Volver al menú principal', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1D3557))),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Color(0xFF1D3557), width: 2),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                        Tooltip(
+                          message: 'Crear otro análisis',
+                          child: IconButton(
+                            icon: const Icon(Icons.add_circle_outline, color: Color(0xFF1D3557), size: 28),
+                            onPressed: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (_) => const SymptomsFormScreen()),
+                              );
+                            },
                           ),
-                          foregroundColor: const Color(0xFF1D3557),
-                          backgroundColor: Colors.white,
-                          elevation: 0,
                         ),
-                        onPressed: () {
-                          Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
-                        },
-                      ),
+                        Tooltip(
+                          message: 'Volver al menú principal',
+                          child: IconButton(
+                            icon: const Icon(Icons.home, color: Color(0xFF1D3557), size: 28),
+                            onPressed: () {
+                              Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
