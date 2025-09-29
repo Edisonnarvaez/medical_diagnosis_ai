@@ -37,7 +37,7 @@ dependencies:
   # Para sugerencias y chips en ingreso de síntomas
   flutter_chips_input: ^2.0.0
   # Para compartir resultados
-  share_plus: ^7.2.1
+  share_plus: ^12.0.0
   # Para PDF (guardar/exportar resultados o historial)
   pdf: ^3.10.4
   printing: ^5.12.0
@@ -50,25 +50,25 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  http: ^1.3.0
+  http: ^1.5.0
   google_generative_ai: ^0.4.7
-  flutter_dotenv: ^5.2.1
-  appwrite: ^16.1.0
-  image_picker: ^1.0.7 # Si usas Firebase Storage o Appwrite para subir la imagen, agrega aquí la dependencia correspondiente
+  flutter_dotenv: ^6.0.0
+  appwrite: ^19.1.0
+  image_picker: ^1.2.0 # Si usas Firebase Storage o Appwrite para subir la imagen, agrega aquí la dependencia correspondiente
   shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   hive_generator: ^2.0.1
-  build_runner: ^2.4.6
+  build_runner: ^2.4.13
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
